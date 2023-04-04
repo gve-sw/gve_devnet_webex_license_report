@@ -47,11 +47,11 @@ class AdminWebexRestAPI():
         """See: https://developer.webex.com/docs/api/v1/people/list-people"""
         
         url= f"{self.BASE_URL}/people"
-        method="GET"
+        max=100 #response entries per request 
 
-        response = self.execute_rest_call(method, url, payload={})
+        people = self.request_data_via_pagination(url, max)
         
-        return response
+        return people
 
 
     def execute_rest_call(self, method, url, payload={}):
@@ -63,6 +63,40 @@ class AdminWebexRestAPI():
             raise Exception(response.json())
         else:
             return response.json()
+
+    
+    def request_data_via_pagination(self, REQUEST_URL, MAX):
+        '''Retrieve a huge amount of data via API based on pagination
+        See also: https://developer.webex.com/docs/basics#pagination'''
+    
+        complete_response_data = []
+    
+        initial_url = f'{REQUEST_URL}?max={str(MAX)}'
+        payload = None
+    
+        #Initial request
+        print(f'-----Initial request url: {initial_url}')
+        response = requests.request("GET", initial_url, headers=self.HEADERS, data=payload)
+        
+        if 'items' in response.json():
+            for entry in response.json()['items']:  
+                complete_response_data.append(entry)
+        
+        #Concurrent requests
+        while 'next' in response.links :
+
+            next_link = response.links['next']['url'] 
+            print(f'-----Next request for link: {next_link}')
+
+            response = requests.get(next_link, headers=self.HEADERS, data=payload)
+
+            if 'items' in response.json():
+                for entry in response.json()['items']:  
+                    complete_response_data.append(entry)
+
+        return complete_response_data
+
+
 
 
 

@@ -17,7 +17,6 @@ or implied.
 
 import json
 import os
-import pprint
 from webex import AdminWebexRestAPI 
 from dotenv import load_dotenv
 load_dotenv()
@@ -55,7 +54,7 @@ def get_people_with_license_ids(license_ids):
 
     people_with_license_ids = []
 
-    for person in org_people['items']:
+    for person in org_people:
         
         associated_person_licenses =  person['licenses']
         
@@ -85,5 +84,3 @@ if __name__ == "__main__":
     for person in people_with_license_ids:
         print(f" * {person['displayName']} {person['emails'][0]}") 
     print(f"{len(people_with_license_ids)} user/s has/have the license/s.")
-
-    #pprint(people_with_license_id)
